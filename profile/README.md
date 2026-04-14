@@ -8,11 +8,13 @@ Hoje o ambiente oficial continua na AWS.
 
 A Hostinger foi preparada para o cutover final com esta estrategia:
 
-- VPS principal preparada: `31.97.162.229`
-- banco oficial preparado na Hostinger: PostgreSQL nativo do host
+- VPS de aplicacao preparada: `31.97.162.229`
+- VPS de banco preparada: `31.97.166.138`
+- VPS de backup preparada: `31.97.163.74`
+- banco oficial preparado na Hostinger: PostgreSQL nativo da VPS2
 - Hostinger em `standby` ate a janela final
-- `31.97.166.138` e `31.97.163.74` fora da rota ativa
 - Solr ainda dependente da AWS nesta etapa
+- backup por atualizacao e a cada 3 dias ja preparado
 
 A documentacao viva dessa migracao fica em [github.com/Eleicoes2026/docs](https://github.com/Eleicoes2026/docs).
 
@@ -31,7 +33,7 @@ A organizacao esta separada por responsabilidade para facilitar evolucao tecnica
 O fluxo principal da plataforma hoje e este:
 
 1. o `eleicoes2026.brandwatch.collector` coleta dados de fontes monitoradas, normaliza resultados e envia para Solr/PostgreSQL
-2. o `eleicoes2026.backend` consulta os dados consolidados, expõe APIs e concentra autenticacao, filtros e regras de negocio
+2. o `eleicoes2026.backend` consulta os dados consolidados, expoe APIs e concentra autenticacao, filtros e regras de negocio
 3. o `eleicoes2026.frontend` consome a API para mostrar dashboards, mencoes, perfis e comparativos
 4. o `eleicoes2026.gitops` publica e opera o ambiente Kubernetes na AWS enquanto a AWS seguir oficial
 5. o `docs` centraliza memoria operacional, relatorios, estado das VPS e plano de cutover/deploy
@@ -47,6 +49,7 @@ Contem:
 - relatorios operacionais
 - inventario das VPS
 - plano de deploy para VPS via GitHub Actions
+- runbook de backup entre VPS
 
 Link: [github.com/Eleicoes2026/docs](https://github.com/Eleicoes2026/docs)
 
@@ -58,7 +61,7 @@ Contem:
 - autenticacao JWT
 - endpoints de candidatos, mencoes, sentimentos, tags, word cloud e perfis
 - importacao de CSV
-- workflow de deploy manual para Hostinger
+- workflow de deploy manual para Hostinger com backup pre-update
 
 Link: [github.com/Eleicoes2026/eleicoes2026.backend](https://github.com/Eleicoes2026/eleicoes2026.backend)
 
@@ -72,7 +75,7 @@ Contem:
 - persistencia em PostgreSQL
 - indexacao em Solr
 - processamento em lote com Anthropic
-- workflow de deploy manual para Hostinger
+- workflow de deploy manual para Hostinger com backup pre-update
 
 Link: [github.com/Eleicoes2026/eleicoes2026.brandwatch.collector](https://github.com/Eleicoes2026/eleicoes2026.brandwatch.collector)
 
@@ -86,7 +89,7 @@ Contem:
 - quadro de mencoes
 - comparativo entre candidatos
 - autenticacao e navegacao protegida
-- workflow de deploy manual para Hostinger
+- workflow de deploy manual para Hostinger com backup pre-update
 
 Link: [github.com/Eleicoes2026/eleicoes2026.frontend](https://github.com/Eleicoes2026/eleicoes2026.frontend)
 
@@ -111,6 +114,7 @@ Modelo atual:
 
 - execucao manual por `workflow_dispatch`
 - conexao SSH na VPS
+- backup automatico da stack e do banco antes de cada deploy
 - sincronizacao do repositorio para `/opt/<repo>`
 - `docker compose up -d --build <service>` no host
 - smoke test local na propria VPS
